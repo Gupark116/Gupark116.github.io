@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Todo-List</title>
+
+    <style>
+        .App {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 500px;
+            margin: 0 auto;
+        }
+
+        .Header h1 {
+            color: rgb(37, 147, 255);
+        }
+
+        .Editor {
+            display: flex;
+            gap: 10px;
+        }
+
+        .Editor input {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid rgb(220, 220, 220);
+            border-radius: 5px;
+        }
+
+        .Editor button {
+            cursor: pointer;
+            width: 80px;
+            border: none;
+            color: white;
+            background-color: rgb(37, 147, 255);
+            border-radius: 5px;
+        }
+
+        .List {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .List > input {
+            width: 100%;
+            border: none;
+            border-bottom: 1px solid rgb(220, 220, 220);
+            padding: 15px 0;
+        }
+
+        .List > input:focus {
+            outline: none;
+            border-bottom: 1px solid rgb(37, 147, 255);
+        }
+
+        .todos_wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .TodoItem {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgb(240, 240, 240);
+        }
+
+        .TodoItem input {
+            width: 20px;
+        }
+
+        .TodoItem .content {
+            flex: 1;
+        }
+
+        .TodoItem .date {
+            font-size: 14px;
+            color: gray;
+        }
+
+        .TodoItem button {
+            cursor: pointer;
+            color: gray;
+            font-size: 14px;
+            border: none;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+    <div class="App">
+        <div class="Header">
+
+            <h3>오늘의 Plan😊</h3>
+            <h1 id="today"></h1>
+
+        </div>
+
+        <form>
+            <div class="Editor">
+                <input
+                    type="text"
+                    id="todoInput"
+                    placeholder="새로운 Todo"
+                >
+                <button type="submit">
+                    추가
+                </button>
+            </div>
+        </form>
+
+        <div class="List">
+
+            <h4>Todo List ☘️</h4>
+            <input
+                type="text"
+                id="keyword"
+                placeholder="검색어를 입력하세요."
+            >
+            <div class="todos_wrapper">
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        let mockData = [
+            {
+                id: 0,
+                isDone: false,
+                content: "React Study",
+                date: new Date().getTime()
+            },
+
+            {
+                id: 1,
+                isDone: true,
+                content: "친구 만나기",
+                date: new Date().getTime()
+            },
+
+            {
+                id: 2,
+                isDone: false,
+                content: "낮잠자기",
+                date: new Date().getTime()
+            }
+
+        ];
+
+        let idIndex = 3;
+        let day = [
+            "일",
+            "월",
+            "화",
+            "수",
+            "목",
+            "금",
+            "토"
+        ];
+
+        onload = () => {
+
+            initData(mockData);
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth() + 1;
+            const date = now.getDate();
+            const dayName = day[now.getDay()];
+
+            document.querySelector("#today").textContent =
+                year + "년 "
+                + month + "월 "
+                + date + "일 "
+                + dayName + "요일";
+
+        };
+
+        const initData = (printData) => {
+
+            const wrapper =
+                document.querySelector(".todos_wrapper");
+
+            wrapper.innerHTML = "";
+            printData.forEach((todo) => {
+
+                const todoItem =
+                    document.createElement("div");
+                todoItem.className = "TodoItem";
+
+                const checkbox =
+                    document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.checked = todo.isDone;
+
+                checkbox.onchange = function () {
+                    onUpdate(todo.id);
+                };
+
+                const content =
+                    document.createElement("div");
+                content.className = "content";
+                
+                content.textContent = todo.content;
+
+                const date =
+                    document.createElement("div");
+                date.className = "date";
+
+
+                const todoDate =
+                    new Date(todo.date);
+                date.textContent =
+                    todoDate.getFullYear()
+                    + "-"
+                    + String(
+                        todoDate.getMonth() + 1
+                    ).padStart(2, "0")
+                    + "-"
+                    + String(
+                        todoDate.getDate()
+                    ).padStart(2, "0");
+
+                const button =
+                    document.createElement("button");
+                button.textContent = "삭제";
+
+                button.name = todo.id;
+                button.onclick = function () {
+                    todoDel(this);
+                };
+
+                todoItem.appendChild(checkbox);
+                todoItem.appendChild(content);
+                todoItem.appendChild(date);
+                todoItem.appendChild(button);
+
+                wrapper.appendChild(todoItem);
+            });
+        };
+
+        document.querySelector("form").addEventListener("submit", function (event) {
+                event.preventDefault();
+                const input =
+                    document.querySelector("#todoInput");
+
+                const inputContent =
+                    input.value.trim();
+
+                if (inputContent === "") {
+                    alert("Todo를 입력해주세요.");
+                    return;
+                }
+
+                const newTodo = {
+                    id: idIndex,
+                    isDone: false,
+                    content: inputContent,
+                    date: new Date().getTime()
+                };
+
+                mockData.push(newTodo);
+                idIndex++;
+                initData(mockData);
+                input.value = "";
+            });
+
+        const onUpdate = (targetId) => {
+            mockData = mockData.map((todo) => {
+                if (todo.id === targetId) {
+                    return {...todo, isDone: !todo.isDone
+                    };
+                }
+                return todo;
+            });
+            initData(mockData);
+        };
+
+        const todoDel = (th) => {
+            const targetId =
+                Number(th.name);
+            mockData = mockData.filter((todo) => {
+                return todo.id !== targetId;
+            });
+            initData(mockData);
+        };
+
+        document.querySelector("#keyword").addEventListener("keyup", (event) => {
+                const search =
+                    event.target.value;
+                const searchedTodos =
+                    getFilterData(search);
+                initData(searchedTodos);
+            });
+        const getFilterData = (search) => {
+            if (search === "") {
+                return mockData;
+            }
+            const filteredData =
+                mockData.filter((todo) => {
+                    return todo.content.toLowerCase().includes(search.toLowerCase());
+                });
+            return filteredData;
+        };
+
+
+    </script>
+
+</body>
+
+</html>
